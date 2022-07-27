@@ -101,7 +101,7 @@
 
       function addCocktail() {
 
-        if(validateInput() && checkPassword()) {
+        if(validateInput()) {
           alert("Cocktail will be added!");
           let newCocktailSpecs = {
             Name: document.forms['newCocktailForm']['ctName'].value,
@@ -112,7 +112,7 @@
           }
           console.log(newCocktailSpecs);
 
-          socket.emit("newCocktail", newCocktailSpecs);
+          socket.emit("newCocktail", {specs: newCocktailSpecs, password: getPassword()});
 
           // Send data to database
         }
@@ -184,9 +184,9 @@
         tag.setAttribute("value", value);
       }
 
-      function checkPassword() {
-        if(document.forms['newCocktailForm']['ctPassword'].value == "Redan") return true;
-        return false;
+      function getPassword() {
+        return document.forms['newCocktailForm']['ctPassword'].value;
+
       }
 
     </script>

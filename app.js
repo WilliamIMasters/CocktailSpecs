@@ -35,9 +35,11 @@ io.on("connection", (socket) => {
     console.log("User disconnected");
   });
 
-  socket.on("newCocktail", (newCocktail) => {
-    console.log(newCocktail);
-    db.insertNewCocktail(newCocktail);
+  socket.on("newCocktail", (data) => {
+    if(data.password == "Redan") {
+      console.log("Password Okay");
+      db.insertNewCocktail(data.specs);
+    }
   });
 });
 
