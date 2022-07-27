@@ -1,0 +1,151 @@
+<HTML>
+  <head>
+
+
+  </head>
+  <body>
+    <div class="ToolBar">
+      <a href="/">home</a>
+  </div>
+    <form name="newCocktailForm">
+      <label for="ctName">Cocktail Name:</label><br>
+      <input type="text" name="ctName"></input><br>
+
+      <label for="ctGlass">Cocktail Glass:</label><br>
+      <input type="text" name="ctGlass"></input><br>
+
+      <label for="ctMethod">Cocktail Method:</label><br>
+      <input type="text" name="ctMethod"></input><br>
+
+      <div class="IngredientContainer">
+        <label for="Ingredients">Ingredients</label><br>
+        <div id="IngredientInputContainer">
+
+        </div>
+        <button type="button" name="btn_addIngredient" onclick="addIngredientEntry()">Add Ingredient</button>
+
+      </div>
+      <div class="TagsContainer">
+        <label for="Tags">Tags</label><br>
+        <div id="TagsInputContainer">
+
+        </div>
+        <button type="button" name="btn_addTag" onclick="addTagEntry()">Add Tag</button>
+
+      </div>
+      <button type="button" onclick="addCocktail()"> submit </button>
+    </form>
+
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+      var socket = io();
+      var data;
+
+      let specsContainer = document.getElementById("SpecContainer");
+
+      socket.on("Data", function(newData) {
+        console.log("Recived data: " + newData.length + " cocktail/s");
+        data = newData;
+
+        updateSpecsContainer(data);
+      });
+
+
+      function getData() {
+        socket.emit("getData");
+      }
+
+
+      function addCocktailToContainer(data) {
+        let ingredientsHTML = "";
+        for(let i=0; i < data.Ingredients.length; i++) {
+          ingredientsHTML +=   "<p>" + data.Ingredients[i].qty + ", " + data.Ingredients[i].ingredient + "</p>";
+        }
+        let html = [
+        '<div id="container">',
+          '<h3 class="CTName">' + data.Name + '</h3>',
+          '<div id="SpecIngredients">',
+            ingredientsHTML,
+          '</div>',
+        '</div>'
+      ].join("\n");
+        specsContainer.innerHTML += html;
+      }
+
+      function updateSpecsContainer(data) {
+        specsContainer.innerHTML = "";
+        for(let i=0; i < data.length; i++) {
+          addCocktailToContainer(data[i]);
+        }
+      }
+
+      let IngCount = 0;
+      function addIngredientEntry() {
+        let IngHTML = '<div class="Ing"><label for="IngQty' + IngCount + '">Qty</label><input class="IngQty" value="" type="text" name="IngQty' + IngCount + '" onchange="updateValue(this, this.value)"></input><label for="Ing' + IngCount + '">Ingredient:</label><input class="Ing" value="" type="text" name="Ing' + IngCount + '" onchange="updateValue(this, this.value)"></input></br></div>';
+        document.getElementById("IngredientInputContainer").innerHTML += IngHTML;
+        IngCount++;
+      }
+
+      let TagCount = 0;
+      function addTagEntry() {
+        let TagHTML = '<div class="Tag"><label for="Tag' + TagCount + '">Tag:</label><input class="Tag" value="" type="text" name="Tag' + TagCount + '" onchange="updateValue(this, this.value)"></input>';
+        document.getElementById("TagsInputContainer").innerHTML += TagHTML;
+        TagCount++;
+      }
+
+
+      function addCocktail() {
+        if(validateInput()) {
+          alert("Cocktail will be added!");
+          let newCocktailSpecs = {
+            Name: document.forms['newCocktailForm']['ctName'].value,
+            Glass: document.forms['newCocktailForm']['ctGlass'].value,
+            Method: document.forms['newCocktailForm']['ctMethod'].value,
+            Ingredients: [],
+            Tags: []
+          }
+          console.log(newCocktailSpecs);
+
+          // Send data to database
+        }
+      }
+
+      function validateInput() {
+        console.log("validateInput");
+        if(document.forms['newCocktailForm']['ctName'].value == "") { // Checks cocktail name isnt empty
+          alert("Cocktail name empty");
+          return false;
+        } else if (document.forms['newCocktailForm']['ctGlass'].value == "") {
+          alert("Cocktail glass empty");
+          return false;
+        } else if (document.forms['newCocktailForm']['ctMethod'].value == "") {
+          alert("Cocktail Method empty");
+          return false;
+        }
+
+        let ingInputContainer = document.getElementById("IngredientInputContainer");
+
+
+        for(let i=0; i < ingInputContainer.childElementCount; i++) {
+          if(ingInputContainer.children[i].getElementsByClassName("IngQty")[0].value == "") {
+            alert("Cocktail ingredient quantity empty");
+            return false;
+          } else if (ingInputContainer.children[i].getElementsByClassName("Ing")[0].value == "") {
+            alert("Cocktail ingredient empty");
+            return false;
+          }
+
+        }
+
+        return true;
+      }
+
+      function updateValue(tag, value) {
+        tag.setAttribute("value", value);
+      }
+
+    </script>
+  </body>
+</HTML>

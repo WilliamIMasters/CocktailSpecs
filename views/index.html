@@ -1,0 +1,75 @@
+<HTML>
+  <head>
+
+
+  </head>
+  <body>
+    <div class="ToolBar">
+      <button onclick="getData()"> Get Data </button>
+      <a href="/NewCocktail">Add Cocktail</a>
+  </div>
+    <div id="SpecContainer">
+
+      <template id="SpecTemp">
+        <div id="container">
+          <h3 class="CTName">Cocktail Name</h3>
+          <div id="SpecIngredients">
+            <p>Ingredient 1</p>
+            <p>Ingredient 2</p>
+            <p>Ingredient 3</p>
+          </div>
+        </div>
+      </template>
+
+
+
+    </div>
+
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+      var socket = io();
+      var data;
+
+      let specsContainer = document.getElementById("SpecContainer");
+
+      socket.on("Data", function(newData) {
+        console.log("Recived data: " + newData.length + " cocktail/s");
+        data = newData;
+
+        updateSpecsContainer(data);
+      });
+
+
+      function getData() {
+        socket.emit("getData");
+      }
+
+
+      function addCocktailToContainer(data) {
+        let ingredientsHTML = "";
+        for(let i=0; i < data.Ingredients.length; i++) {
+          ingredientsHTML +=   "<p>" + data.Ingredients[i].qty + ", " + data.Ingredients[i].ingredient + "</p>";
+        }
+        let html = [
+        '<div id="container">',
+          '<h3 class="CTName">' + data.Name + '</h3>',
+          '<div id="SpecIngredients">',
+            ingredientsHTML,
+          '</div>',
+        '</div>'
+      ].join("\n");
+        specsContainer.innerHTML += html;
+      }
+
+      function updateSpecsContainer(data) {
+        specsContainer.innerHTML = "";
+        for(let i=0; i < data.length; i++) {
+          addCocktailToContainer(data[i]);
+        }
+      }
+
+    </script>
+  </body>
+</HTML>
