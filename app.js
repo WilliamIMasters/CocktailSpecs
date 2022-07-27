@@ -20,7 +20,6 @@ app.get("/NewCocktail", function(req,res) {
 
 io.on("connection", (socket) => {
   console.log("A user connected");
-
   socket.on("getData", () => {
     console.log("User requested Data");
 
@@ -32,10 +31,13 @@ io.on("connection", (socket) => {
 
 
   });
-
-
   socket.on("disconnect", () => {
     console.log("User disconnected");
+  });
+
+  socket.on("newCocktail", (newCocktail) => {
+    console.log(newCocktail);
+    db.insertNewCocktail(newCocktail);
   });
 });
 

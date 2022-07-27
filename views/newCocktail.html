@@ -33,6 +33,9 @@
         <button type="button" name="btn_addTag" onclick="addTagEntry()">Add Tag</button>
 
       </div>
+
+      <label for="ctPassword">Password:</label><br>
+      <input type="password" name="ctPassword"></input><br>
       <button type="button" onclick="addCocktail()"> submit </button>
     </form>
 
@@ -90,23 +93,26 @@
 
       let TagCount = 0;
       function addTagEntry() {
-        let TagHTML = '<div class="Tag"><label for="Tag' + TagCount + '">Tag:</label><input class="Tag" value="" type="text" name="Tag' + TagCount + '" onchange="updateValue(this, this.value)"></input>';
+        let TagHTML = '<div class="Tag"><label for="Tag' + TagCount + '">Tag:</label><input class="Tag" value="" type="text" name="Tag' + TagCount + '" onchange="updateValue(this, this.value)"></input></div>';
         document.getElementById("TagsInputContainer").innerHTML += TagHTML;
         TagCount++;
       }
 
 
       function addCocktail() {
-        if(validateInput()) {
+
+        if(validateInput() && checkPassword()) {
           alert("Cocktail will be added!");
           let newCocktailSpecs = {
             Name: document.forms['newCocktailForm']['ctName'].value,
             Glass: document.forms['newCocktailForm']['ctGlass'].value,
             Method: document.forms['newCocktailForm']['ctMethod'].value,
-            Ingredients: [],
-            Tags: []
+            Ingredients: getAllIngredientData(),
+            Tags: getAllTagData()
           }
           console.log(newCocktailSpecs);
+
+          socket.emit("newCocktail", newCocktailSpecs);
 
           // Send data to database
         }
@@ -114,6 +120,8 @@
 
       function validateInput() {
         console.log("validateInput");
+
+        // Validates cocktail name, glass and meathod
         if(document.forms['newCocktailForm']['ctName'].value == "") { // Checks cocktail name isnt empty
           alert("Cocktail name empty");
           return false;
@@ -125,25 +133,60 @@
           return false;
         }
 
-        let ingInputContainer = document.getElementById("IngredientInputContainer");
-
-
-        for(let i=0; i < ingInputContainer.childElementCount; i++) {
-          if(ingInputContainer.children[i].getElementsByClassName("IngQty")[0].value == "") {
+        // Validates ingredient Input
+        let ingData = getAllIngredientData();
+        for(let i=0; i < ingData.length; i++) {
+          if(ingData[i].qty == "") {
             alert("Cocktail ingredient quantity empty");
             return false;
-          } else if (ingInputContainer.children[i].getElementsByClassName("Ing")[0].value == "") {
+          } else if(ingData[i].ingredient == "") {
             alert("Cocktail ingredient empty");
             return false;
           }
-
         }
+
+        // Validates tag data
+        let tagData = getAllTagData();
+        for(let i=0; i < tagData.length; i++) {
+          if(tagData[i] == "") {
+            alert("Cocktail tag empty");
+            return false;
+          }
+        }
+
 
         return true;
       }
 
+      function getAllTagData() {
+        let tags = [];
+
+        let tagInputContainer = document.getElementById("TagsInputContainer");
+        for(let i=0; i < tagInputContainer.childElementCount; i++) {
+          tags.push(tagInputContainer.children[i].getElementsByClassName("Tag")[0].value);
+        }
+        return tags;
+      }
+
+      function getAllIngredientData() {
+        let ingredients = [];
+
+        let ingredientInputContainer = document.getElementById("IngredientInputContainer");
+        for(let i=0; i < ingredientInputContainer.childElementCount; i++) {
+          let iQty = ingredientInputContainer.children[i].getElementsByClassName("IngQty")[0].value;
+          let ing = ingredientInputContainer.children[i].getElementsByClassName("Ing")[0].value;
+          ingredients.push({qty: iQty, ingredient: ing});
+        }
+        return ingredients;
+      }
+
       function updateValue(tag, value) {
         tag.setAttribute("value", value);
+      }
+
+      function checkPassword() {
+        if(document.forms['newCocktailForm']['ctPassword'].value == "Redan") return true;
+        return false;
       }
 
     </script>
