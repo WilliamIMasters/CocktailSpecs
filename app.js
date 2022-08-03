@@ -6,7 +6,7 @@ const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
-const port = 8080;
+const port = 80;
 
 app.get("/", function(req,res) {
   res.sendFile("views/index.html", {root: __dirname});
@@ -47,8 +47,8 @@ server.listen(port, () => {
   console.log('listening on *:' + port);
 });
 
-
-
-
-let data =
-  [{Name: "oldFashoned", Specs: "whiskey"},{Name: "martini", Specs: "Vodka"}];
+//
+// process.on('SIGTERM', () => {
+//     console.log("Close Server");
+//
+// });
